@@ -9,4 +9,8 @@ public class UnityAsset {
     public UnityAsset(ByteBuffer content) {
         this.content = content;
     }
+
+    public String asString() {
+        return new String(this.content.array());
+    }
 }
