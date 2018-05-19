@@ -26,12 +26,16 @@ public class AssetIndex extends Mapping {
 
     @Getter
     private List<UnityIndex> assetIndex;
+    @Getter
+    private HashMap<UnityIndex, UnityAsset> assets;
+
+
 
     public AssetIndex(Path file) {
         this.file = file;
     }
 
-    public Integer parse() throws IOException, FormatInvalid {
+    public void parse() throws IOException, FormatInvalid {
 
         SeekableByteChannel channel = Files.newByteChannel(file, StandardOpenOption.READ);
         Long filesize = channel.size();
@@ -44,10 +48,9 @@ public class AssetIndex extends Mapping {
         setByteOrder(ByteOrder.LITTLE_ENDIAN);
         assetIndex = getIndexList(channel);
 
-        getAllAssets(channel);
+        assets = getAllAssets(channel);
 
         channel.close();
-        return 0;
     }
 
     private List<UnityIndex> getIndexList(SeekableByteChannel channel) throws IOException, FormatInvalid {
@@ -98,7 +101,7 @@ public class AssetIndex extends Mapping {
     public HashMap<UnityIndex, UnityAsset> getAllAssets(SeekableByteChannel channel) throws IOException {
         HashMap<UnityIndex, UnityAsset> assets = new LinkedHashMap<>();
         for (UnityIndex index : assetIndex) {
-            if (index.getOffset() > 0 && index.getSize() > 0) {
+            if (index.getSize() > 0) {
                 ByteBuffer buffer = ByteBuffer.allocate(index.getSize());
                 channel.position(index.getOffset() + headerSize).read(buffer);
                 assets.put(index, new UnityAsset(buffer));
