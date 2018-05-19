@@ -1,5 +1,8 @@
 package org.synogen.unitypatcher;
 
+import lombok.Data;
+import lombok.Setter;
+
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -13,6 +16,9 @@ public abstract class Mapping {
     private final Integer MAX_READ_BUFFER = 2048;
 
     private final Integer MAX_SKIP_TIMES = 256;
+
+    @Setter
+    private static ByteOrder byteOrder = ByteOrder.LITTLE_ENDIAN;
 
     protected HashMap<String, Object> variables = new HashMap<>();
 
@@ -96,7 +102,7 @@ public abstract class Mapping {
      */
     protected static Integer readInteger(SeekableByteChannel channel) throws IOException {
         ByteBuffer intValue = ByteBuffer.allocate(4);
-        intValue.order(ByteOrder.LITTLE_ENDIAN);
+        intValue.order(byteOrder);
         channel.read(intValue);
         return intValue.getInt(0);
     }

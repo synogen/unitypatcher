@@ -6,7 +6,7 @@ import java.nio.file.Paths;
 public class App {
 
     public static void main(String[] args) throws IOException, FormatInvalid {
-        FindIndexEntryPoint p = new FindIndexEntryPoint(Paths.get("sharedassets1.assets"));
+        AssetIndex p = new AssetIndex(Paths.get("sharedassets3.assets"));
         p.parse();
     }
 }
