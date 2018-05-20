@@ -53,8 +53,12 @@ public class AssetFile extends Mapping {
         System.out.println("Trying to find entry point for file index...");
         setByteOrder(ByteOrder.LITTLE_ENDIAN);
         assetIndex = getIndexList(channel);
-
-        assets = getAllAssets(channel);
+        if (assetIndex != null) {
+            System.out.println("Found file index, reading assets...");
+            assets = getAllAssets(channel);
+        } else {
+            System.out.println("No file index found");
+        }
 
         channel.close();
     }

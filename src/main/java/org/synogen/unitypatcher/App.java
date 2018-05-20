@@ -29,8 +29,10 @@ public class App {
             if (args[0].equalsIgnoreCase("export")) {
                 if (index.getType() == 5) {
                     Files.write(Paths.get(pathId + ".txt"), asset.asTextContent());
+                    System.out.println("Exported asset with path ID " + pathId + " as text content");
                 } else {
                     Files.write(Paths.get(pathId + ".raw"), asset.asByteArray());
+                    System.out.println("Exported asset with path ID " + pathId + " as raw content");
                 }
             } else if (args[0].equalsIgnoreCase("import")) {
                 if (index.getType() == 5) {
@@ -38,9 +40,12 @@ public class App {
                     asset.replaceTextContent(newContent);
                     assetFile.updateOffsetsAndSize();
                     assetFile.save(Paths.get(args[1] + ".modified"));
+                    System.out.println("Imported asset with path ID " + pathId + " as text content");
+                    System.out.println("Modified asset file saved as " + args[1] + ".modified");
                 }
 
             }
+            System.out.println("Done.");
         }
     }
 }
