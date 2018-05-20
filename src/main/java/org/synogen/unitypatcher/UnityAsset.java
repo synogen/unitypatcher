@@ -29,7 +29,8 @@ public class UnityAsset {
         content.order(ByteOrder.LITTLE_ENDIAN);
         content.position(0);
         Integer nameLength = content.getInt();
-        content.position(content.position() + nameLength);
+        boolean even = nameLength % 2 == 0;
+        content.position(content.position() + nameLength + (even ? 0 : 1));
         Integer contentLength = content.getInt();
         byte[] textContent = new byte[contentLength];
         content.get(textContent);
