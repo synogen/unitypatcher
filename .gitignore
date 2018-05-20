@@ -1,4 +1,5 @@
 .idea
 *.assets*
 *.iml
-dist
+dist/*
+!dist/unitypatcher.cmd
