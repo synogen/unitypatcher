@@ -12,7 +12,7 @@ public class App {
 
     public static void main(String[] args) throws IOException, FormatInvalid {
         if (args == null || args.length < 3) {
-            System.out.println("unitypatcher test version");
+            System.out.println("unitypatcher test version (https://github.com/synogen/unitypatcher)");
             System.out.println("!! ONLY TEXT ASSETS SUPPORTED RIGHT NOW !!");
             System.out.println();
             System.out.println("Usage:");
