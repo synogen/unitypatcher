@@ -29,10 +29,10 @@ public class App {
             if (args[0].equalsIgnoreCase("export")) {
                 if (index.getType() == 5) {
                     Files.write(Paths.get(pathId + ".txt"), asset.asTextContent());
-                    System.out.println("Exported asset with path ID " + pathId + " as text content");
+                    System.out.println("Exported asset with path ID " + pathId + " as text content (" + pathId + ".txt)");
                 } else {
                     Files.write(Paths.get(pathId + ".raw"), asset.asByteArray());
-                    System.out.println("Exported asset with path ID " + pathId + " as raw content");
+                    System.out.println("Exported asset with path ID " + pathId + " as raw content (" + pathId + ".raw)");
                 }
             } else if (args[0].equalsIgnoreCase("import")) {
                 if (index.getType() == 5) {
