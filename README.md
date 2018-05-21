@@ -19,4 +19,5 @@ Run `unitypatcher` without arguments to get help.
 
 ## Download
 
-No releases yet, you can clone the repository and run "maven package" to generate a jar-file if you like. 
+Check the [releases](https://github.com/synogen/unitypatcher/releases)
+ 
