@@ -1,5 +1,6 @@
 package org.synogen.unitypatcher;
 
+import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
@@ -35,14 +36,18 @@ public class UnityAsset {
     }
 
     public byte[] asTextContent() {
-        content.order(ByteOrder.LITTLE_ENDIAN);
-        content.position(0);
-        Integer nameLength = content.getInt();
-        content.position(content.position() + nameLength + paddingFor(nameLength));
-        Integer contentLength = content.getInt();
-        byte[] textContent = new byte[contentLength];
-        content.get(textContent);
-        return textContent;
+        try {
+            content.order(ByteOrder.LITTLE_ENDIAN);
+            content.position(0);
+            Integer nameLength = content.getInt();
+            content.position(content.position() + nameLength + paddingFor(nameLength));
+            Integer contentLength = content.getInt();
+            byte[] textContent = new byte[contentLength];
+            content.get(textContent);
+            return textContent;
+        } catch (BufferUnderflowException e) {
+            return "Failed to export text content, invalid size".getBytes();
+        }
     }
 
     public void replaceTextContent(byte[] newContent) {

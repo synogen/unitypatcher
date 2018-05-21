@@ -19,8 +19,8 @@ public class App {
             System.out.println();
             System.out.println("Usage:");
             System.out.println();
-            System.out.println("    unitypatcher export <assets-file> <path ID>");
-            System.out.println("    unitypatcher import <assets-file> <path ID> <file to import>");
+            System.out.println("    unitypatcher export <assets-file> <path ID or asset name or *>");
+            System.out.println("    unitypatcher import <assets-file> <path ID or asset name> <file to import>");
             System.out.println("    unitypatcher patch <assets-file> <patch file>");
             System.out.println();
             System.out.println("Notes:");
@@ -41,13 +41,22 @@ public class App {
             if (args[0].equalsIgnoreCase("export")) {
                 UnityIndex index = indexFromPathIdOrName(args[2], assets);
 
-                UnityAsset asset = assets.get(index);
-                if (index.getType() == 5) {
-                    Files.write(Paths.get(index.getId() + ".txt"), asset.asTextContent());
-                    System.out.println("Exported asset with path ID " + index.getId() + " as text content (" + index.getId() + ".txt)");
+                if (index == null) {
+                    System.out.println("Asset name/path ID not provided or could not be found, exporting all text assets");
+                    for (UnityIndex idx : assets.keySet()) {
+                        if (idx.getType().compareTo(5) == 0) {
+                            Files.write(Paths.get(idx.getId() + ".txt"), assets.get(idx).asTextContent());
+                        }
+                    }
                 } else {
-                    Files.write(Paths.get(index.getId() + ".raw"), asset.asByteArray());
-                    System.out.println("Exported asset with path ID " + index.getId() + " as raw content (" + index.getId() + ".raw)");
+                    UnityAsset asset = assets.get(index);
+                    if (index.getType().compareTo(5) == 0) {
+                        Files.write(Paths.get(index.getId() + ".txt"), asset.asTextContent());
+                        System.out.println("Exported asset with path ID " + index.getId() + " as text content (" + index.getId() + ".txt)");
+                    } else {
+                        Files.write(Paths.get(index.getId() + ".raw"), asset.asByteArray());
+                        System.out.println("Exported asset with path ID " + index.getId() + " as raw content (" + index.getId() + ".raw)");
+                    }
                 }
             } else if (args[0].equalsIgnoreCase("import")) {
                 UnityIndex index = indexFromPathIdOrName(args[2], assets);
@@ -100,23 +109,23 @@ public class App {
     }
 
     private static UnityIndex indexFromPathIdOrName(String arg, HashMap<UnityIndex, UnityAsset> assets) {
-        UnityIndex result = null;
         // find text asset by name if no path ID is given
-        if (!isInteger(arg)) {
+        if (arg == null) {
+            return null;
+        } else if (!isInteger(arg)) {
             for (UnityIndex index : assets.keySet()) {
                 if (index.getType().compareTo(5) == 0) {
                     UnityAsset asset = assets.get(index);
                     if (arg.equalsIgnoreCase(asset.getTextName())) {
-                        result = index;
-                        break;
+                        return index;
                     }
                 }
             }
+            return null;
         } else {
             Integer pathId = Integer.parseInt(arg);
-            result = new ArrayList<>(assets.keySet()).get(pathId - 1);
+            return new ArrayList<>(assets.keySet()).get(pathId - 1);
         }
-        return result;
     }
 
     private static boolean isInteger(String arg) {
