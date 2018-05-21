@@ -89,9 +89,9 @@ public class App {
                     assetFile.updateOffsetsAndSize();
                     assetFile.save(Paths.get(args[1] + ".modified"));
 
-                    // back up original
+                    System.out.println("Creating backup of the original asset file (" + args[1] + ".modbackup)");
                     Files.copy(Paths.get(args[1]), Paths.get(args[1] + ".modbackup"), StandardCopyOption.REPLACE_EXISTING);
-                    // copy modified file to original
+                    System.out.println("Replacing original asset file with modified version")
                     Files.copy(Paths.get(args[1] + ".modified"), Paths.get(args[1]), StandardCopyOption.REPLACE_EXISTING);
                 }
             }
