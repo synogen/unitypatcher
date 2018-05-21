@@ -1,7 +1,9 @@
 package org.synogen.unitypatcher;
 
 import java.io.IOException;
-import java.nio.file.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -37,37 +39,37 @@ public class App {
             HashMap<UnityIndex, UnityAsset> assets = assetFile.getAssets();
 
             if (args[0].equalsIgnoreCase("export")) {
-                Integer pathId = Integer.parseInt(args[2]);
-                UnityIndex index = new ArrayList<>(assets.keySet()).get(pathId - 1);
+                UnityIndex index = indexFromPathIdOrName(args[2], assets);
+
                 UnityAsset asset = assets.get(index);
                 if (index.getType() == 5) {
-                    Files.write(Paths.get(pathId + ".txt"), asset.asTextContent());
-                    System.out.println("Exported asset with path ID " + pathId + " as text content (" + pathId + ".txt)");
+                    Files.write(Paths.get(index.getId() + ".txt"), asset.asTextContent());
+                    System.out.println("Exported asset with path ID " + index.getId() + " as text content (" + index.getId() + ".txt)");
                 } else {
-                    Files.write(Paths.get(pathId + ".raw"), asset.asByteArray());
-                    System.out.println("Exported asset with path ID " + pathId + " as raw content (" + pathId + ".raw)");
+                    Files.write(Paths.get(index.getId() + ".raw"), asset.asByteArray());
+                    System.out.println("Exported asset with path ID " + index.getId() + " as raw content (" + index.getId() + ".raw)");
                 }
             } else if (args[0].equalsIgnoreCase("import")) {
-                Integer pathId = Integer.parseInt(args[2]);
-                UnityIndex index = new ArrayList<>(assets.keySet()).get(pathId - 1);
+                UnityIndex index = indexFromPathIdOrName(args[2], assets);
+
                 UnityAsset asset = assets.get(index);
                 if (index.getType() == 5) {
                     byte[] newContent = Files.readAllBytes(Paths.get(args[3]));
                     asset.replaceTextContent(newContent);
                     assetFile.updateOffsetsAndSize();
                     assetFile.save(Paths.get(args[1] + ".modified"));
-                    System.out.println("Imported asset with path ID " + pathId + " as text content");
+                    System.out.println("Imported asset with path ID " + index.getId() + " as text content");
                     System.out.println("Modified asset file saved as " + args[1] + ".modified");
                 }
             } else if (args[0].equalsIgnoreCase("patch")) {
                 List<String> lines = Files.readAllLines(Paths.get(args[2]));
                 if (lines.size() >= 3) {
-                    Integer pathId = Integer.parseInt(lines.get(0));
+                    String pathId = lines.get(0);
                     String regex = lines.get(1);
                     String replace = lines.get(2);
 
-                    System.out.println("Reading text content from asset " + pathId);
-                    UnityIndex index = new ArrayList<>(assets.keySet()).get(pathId - 1);
+                    UnityIndex index = indexFromPathIdOrName(pathId, assets);
+                    System.out.println("Reading text content from asset " + index.getId());
                     UnityAsset asset = assets.get(index);
 
                     System.out.println("Patching content");
@@ -94,6 +96,35 @@ public class App {
                 }
             }
             System.out.println("Done.");
+        }
+    }
+
+    private static UnityIndex indexFromPathIdOrName(String arg, HashMap<UnityIndex, UnityAsset> assets) {
+        UnityIndex result = null;
+        // find text asset by name if no path ID is given
+        if (!isInteger(arg)) {
+            for (UnityIndex index : assets.keySet()) {
+                if (index.getType().compareTo(5) == 0) {
+                    UnityAsset asset = assets.get(index);
+                    if (arg.equalsIgnoreCase(asset.getTextName())) {
+                        result = index;
+                        break;
+                    }
+                }
+            }
+        } else {
+            Integer pathId = Integer.parseInt(arg);
+            result = new ArrayList<>(assets.keySet()).get(pathId - 1);
+        }
+        return result;
+    }
+
+    private static boolean isInteger(String arg) {
+        try {
+            Integer.parseInt(arg);
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
         }
     }
 }

@@ -25,6 +25,15 @@ public class UnityAsset {
         return content.array();
     }
 
+    public String getTextName() {
+        content.order(ByteOrder.LITTLE_ENDIAN);
+        content.position(0);
+        Integer nameLength = content.getInt();
+        byte[] textName = new byte[nameLength];
+        content.get(textName);
+        return new String(textName);
+    }
+
     public byte[] asTextContent() {
         content.order(ByteOrder.LITTLE_ENDIAN);
         content.position(0);

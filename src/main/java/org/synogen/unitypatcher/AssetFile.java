@@ -198,7 +198,10 @@ public class AssetFile extends Mapping {
             }
 
             UnityAsset asset = assets.get(index);
-            writeChannel.write(asset.getOutputBuffer());
+            // sadly i am not smart enough to figure out why writing asset.getOutputBuffer() directly does not work
+            // despite flipping the buffer (0 bytes written)
+            // therefore this ugly wrapping solution is now in place
+            writeChannel.write(ByteBuffer.wrap(asset.getOutputBuffer().array()));
 
             previousOffset = index.getOffset();
             previousSize = index.getSize();
