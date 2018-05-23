@@ -41,16 +41,19 @@ public class App {
             if (args[0].equalsIgnoreCase("export")) {
                 UnityIndex index = indexFromPathIdOrName(args[2], assets);
 
+
                 if (index == null) {
                     System.out.println("Asset name/path ID not provided or could not be found, exporting all text assets");
                     for (UnityIndex idx : assets.keySet()) {
-                        if (Util.isTextType(idx)) {
-                            Files.write(Paths.get(idx.getId() + ".txt"), assets.get(idx).asTextContent());
+                        UnityAsset asset = assets.get(idx);
+                        if (asset.isTextContent()) {
+                            Files.write(Paths.get(idx.getId() + ".txt"), asset.asTextContent());
+                            System.out.println("Exported asset with path ID " + idx.getId() + " as text content (" + idx.getId() + ".txt)");
                         }
                     }
                 } else {
                     UnityAsset asset = assets.get(index);
-                    if (Util.isTextType(index)) {
+                    if (asset.isTextContent()) {
                         Files.write(Paths.get(index.getId() + ".txt"), asset.asTextContent());
                         System.out.println("Exported asset with path ID " + index.getId() + " as text content (" + index.getId() + ".txt)");
                     } else {

@@ -1,16 +1,19 @@
 package org.synogen.unitypatcher;
 
+import sun.reflect.generics.tree.ByteSignature;
+
+import java.math.BigDecimal;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
-public class UnityAsset {
+public class UnityAsset extends Mapping {
 
     private ByteBuffer content;
 
     public ByteBuffer getOutputBuffer() {
         content.order(ByteOrder.LITTLE_ENDIAN);
-        content.flip();
+        content.position(0);
         return content;
     }
 
@@ -48,6 +51,46 @@ public class UnityAsset {
         } catch (BufferUnderflowException e) {
             return "Failed to export text content, invalid size".getBytes();
         }
+    }
+
+    public boolean isTextContent() {
+        content.order(ByteOrder.LITTLE_ENDIAN);
+        content.position(0);
+        Integer nameLength = content.getInt();
+        if (nameLength > 0 && nameLength <= 300 && nameLength < (content.capacity() - content.position())) {
+            byte[] name = new byte[nameLength];
+            content.get(name);
+            if (textPercentage(name) > 75 && (content.position() + paddingFor(nameLength)) < content.capacity()) {
+                content.position(content.position() + paddingFor(nameLength));
+                Integer textLength = content.getInt();
+                if (textLength > 0 && textLength < 20000000 && textLength < (content.capacity() - content.position())) {
+                    byte[] text = new byte[textLength];
+                    content.get(text);
+                    if (textPercentage(text) > 75) {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
+
+    private Long textPercentage(byte[] text) {
+        Integer numText = 0;
+        for (int i = 0; i < text.length; i++) {
+            switch (text[i]) {
+                case 0x09:
+                case 0x0A:
+                case 0x0B:
+                case 0x0D:
+                    numText++; break;
+                default:
+                    if (text[i] > 0x20 && text[i] < 0x7E) {
+                        numText++;
+                    }
+            }
+        }
+        return Math.round((double)numText / (double)text.length * 100);
     }
 
     public void replaceTextContent(byte[] newContent) {
