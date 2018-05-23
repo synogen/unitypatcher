@@ -78,7 +78,10 @@ public class App {
                 if (lines.size() >= 3) {
                     String pathId = lines.get(0);
                     String regex = lines.get(1);
-                    String replace = lines.get(2);
+                    String replace = "";
+                    for (int i = 2; i < lines.size(); i++) {
+                        replace += lines.get(i) + "\r\n";
+                    }
 
                     UnityIndex index = indexFromPathIdOrName(pathId, assets);
                     System.out.println("Reading text content from asset " + index.getId());
@@ -105,6 +108,7 @@ public class App {
                     Files.copy(Paths.get(args[1]), Paths.get(args[1] + ".modbackup"), StandardCopyOption.REPLACE_EXISTING);
                     System.out.println("Replacing original asset file with modified version");
                     Files.copy(Paths.get(args[1] + ".modified"), Paths.get(args[1]), StandardCopyOption.REPLACE_EXISTING);
+                    Files.delete(Paths.get(args[1] + ".modified"));
                 }
             }
             System.out.println("Done.");
