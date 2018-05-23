@@ -9,11 +9,13 @@ unitypatcher requires [Java Runtime Environment 8](http://www.oracle.com/technet
 
 Command line overview:
 
-`unitypatcher export <assets-file> <path ID>`
+`unitypatcher export <assets-file> <path ID/asset name/*>`
 
-`unitypatcher import <assets-file> <path ID> <file to import>`
+`unitypatcher import <assets-file> <path ID/asset name> <file to import>`
 
 `unitypatcher patch <assets-file> <patch file>`
+
+Example: `unitypatcher export sharedassets3.assets 530`
 
 Run `unitypatcher` without arguments to get help.
 
