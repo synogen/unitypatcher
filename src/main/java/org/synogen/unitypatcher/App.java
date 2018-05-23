@@ -26,7 +26,7 @@ public class App {
             System.out.println("Notes:");
             System.out.println("Use UABE or another tool to get information on the path ID of a certain asset, only file ID 0 is supported by unitypatcher right now.");
             System.out.println("Patch file format:");
-            System.out.println("Three lines, first line contains the path ID, second line the regular expression to search for and third line what to replace it with.");
+            System.out.println("Three or more lines, first line contains the path ID, second line the regular expression to search for and third line and all lines after that contain what to replace it with.");
             System.out.println("Test the regular expression replace in a text editor first for best results.");
             System.out.println("Example:");
             System.out.println("    530");
