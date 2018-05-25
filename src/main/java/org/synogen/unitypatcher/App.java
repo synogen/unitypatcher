@@ -80,7 +80,7 @@ public class App {
                     String regex = lines.get(1);
                     String replace = "";
                     for (int i = 2; i < lines.size(); i++) {
-                        replace += lines.get(i) + "\r\n";
+                        replace += lines.get(i) + ((i < lines.size() - 1) ? "\r\n" : "");
                     }
 
                     UnityIndex index = indexFromPathIdOrName(pathId, assets);
