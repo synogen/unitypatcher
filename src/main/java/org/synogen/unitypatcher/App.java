@@ -14,7 +14,7 @@ public class App {
 
     public static void main(String[] args) throws IOException, FormatInvalid {
         if (args == null || args.length < 3) {
-            System.out.println("unitypatcher 0.0.2 (https://github.com/synogen/unitypatcher)");
+            System.out.println("unitypatcher 0.0.3 (https://github.com/synogen/unitypatcher)");
             System.out.println("!! ONLY TEXT ASSETS SUPPORTED FOR IMPORT/PATCHING RIGHT NOW !!");
             System.out.println();
             System.out.println("Usage:");
