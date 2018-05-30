@@ -20,6 +20,7 @@ public class AssetFile extends Mapping {
     private final String HEADER_STRUCTURE = "i(filesize)i(version)i(headersize)i";
     private final String INDEX_STRUCTURE = "(id)i(unknown)i(offset)i(size)i(type)i";
 
+    @Getter
     private Path file;
 
     private Integer headerSize;

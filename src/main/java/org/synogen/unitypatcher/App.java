@@ -40,25 +40,29 @@ public class App {
 
             if (args[0].equalsIgnoreCase("export")) {
                 UnityIndex index = indexFromPathIdOrName(args[2], assets);
-
+                String prefix = assetFile.getFile().getFileName().toString();
+                prefix = prefix.split("\\.")[0];
 
                 if (index == null) {
                     System.out.println("Asset name/path ID not provided or could not be found, exporting all text assets");
                     for (UnityIndex idx : assets.keySet()) {
                         UnityAsset asset = assets.get(idx);
                         if (asset.isTextContent()) {
-                            Files.write(Paths.get(idx.getId() + ".txt"), asset.asTextContent());
-                            System.out.println("Exported asset with path ID " + idx.getId() + " as text content (" + idx.getId() + ".txt)");
+                            String filename = prefix + "_" + idx.getId() + ".txt";
+                            Files.write(Paths.get(filename), asset.asTextContent());
+                            System.out.println("Exported asset with path ID " + idx.getId() + " (" + asset.getTextName() + ") as text content (" + filename + ")");
                         }
                     }
                 } else {
                     UnityAsset asset = assets.get(index);
                     if (asset.isTextContent()) {
-                        Files.write(Paths.get(index.getId() + ".txt"), asset.asTextContent());
-                        System.out.println("Exported asset with path ID " + index.getId() + " as text content (" + index.getId() + ".txt)");
+                        String filename = prefix + "_" + index.getId() + ".txt";
+                        Files.write(Paths.get(filename), asset.asTextContent());
+                        System.out.println("Exported asset with path ID " + index.getId() + " (" + asset.getTextName() + ") as text content (" + filename + ")");
                     } else {
-                        Files.write(Paths.get(index.getId() + ".raw"), asset.asByteArray());
-                        System.out.println("Exported asset with path ID " + index.getId() + " as raw content (" + index.getId() + ".raw)");
+                        String filename = prefix + "_" + index.getId() + ".raw";
+                        Files.write(Paths.get(filename), asset.asByteArray());
+                        System.out.println("Exported asset with path ID " + index.getId() + " as raw content (" + filename + ")");
                     }
                 }
             } else if (args[0].equalsIgnoreCase("import")) {
@@ -74,42 +78,51 @@ public class App {
                     System.out.println("Modified asset file saved as " + args[1] + ".modified");
                 }
             } else if (args[0].equalsIgnoreCase("patch")) {
-                List<String> lines = Files.readAllLines(Paths.get(args[2]));
-                if (lines.size() >= 3) {
-                    String pathId = lines.get(0);
-                    String regex = lines.get(1);
-                    String replace = "";
-                    for (int i = 2; i < lines.size(); i++) {
-                        replace += lines.get(i) + ((i < lines.size() - 1) ? "\r\n" : "");
-                    }
-
-                    UnityIndex index = indexFromPathIdOrName(pathId, assets);
-                    System.out.println("Reading text content from asset " + index.getId());
-                    UnityAsset asset = assets.get(index);
-
-                    System.out.println("Patching content");
-                    String textcontent = new String(asset.asTextContent());
-
-                    Pattern definition = Pattern.compile(regex);
-                    Matcher matcher = definition.matcher(textcontent);
-                    Integer replacementCount = 0;
-                    while (matcher.find()) {
-                        replacementCount++;
-                    }
-                    System.out.println("Replacing " + replacementCount + " matches...");
-                    textcontent = matcher.replaceAll(replace);
-
-                    System.out.println("Writing content back to file");
-                    asset.replaceTextContent(textcontent.getBytes());
-                    assetFile.updateOffsetsAndSize();
-                    assetFile.save(Paths.get(args[1] + ".modified"));
-
-                    System.out.println("Creating backup of the original asset file (" + args[1] + ".modbackup)");
-                    Files.copy(Paths.get(args[1]), Paths.get(args[1] + ".modbackup"), StandardCopyOption.REPLACE_EXISTING);
-                    System.out.println("Replacing original asset file with modified version");
-                    Files.copy(Paths.get(args[1] + ".modified"), Paths.get(args[1]), StandardCopyOption.REPLACE_EXISTING);
-                    Files.delete(Paths.get(args[1] + ".modified"));
+                List<String> files = new ArrayList<>();
+                for (int i = 2; i < args.length; i++) {
+                    files.add(args[i]);
                 }
+                for (String file : files) {
+                    List<String> lines = Files.readAllLines(Paths.get(file));
+                    if (lines.size() >= 3) {
+                        String pathId = lines.get(0);
+                        String regex = lines.get(1);
+                        String replace = "";
+                        for (int i = 2; i < lines.size(); i++) {
+                            replace += lines.get(i) + ((i < lines.size() - 1) ? "\r\n" : "");
+                        }
+
+                        UnityIndex index = indexFromPathIdOrName(pathId, assets);
+                        System.out.println("Reading text content from asset " + index.getId());
+                        UnityAsset asset = assets.get(index);
+
+                        System.out.println("Patching content");
+                        String textcontent = new String(asset.asTextContent());
+
+                        Pattern definition = Pattern.compile(regex);
+                        Matcher matcher = definition.matcher(textcontent);
+                        Integer replacementCount = 0;
+                        while (matcher.find()) {
+                            replacementCount++;
+                        }
+                        System.out.println("Replacing " + replacementCount + " matches...");
+                        textcontent = matcher.replaceAll(replace);
+
+                        System.out.println("Writing content back to file");
+                        asset.replaceTextContent(textcontent.getBytes());
+                    }
+                }
+
+
+                assetFile.updateOffsetsAndSize();
+                assetFile.save(Paths.get(args[1] + ".modified"));
+
+                System.out.println("Creating backup of the original asset file (" + args[1] + ".modbackup)");
+                Files.copy(Paths.get(args[1]), Paths.get(args[1] + ".modbackup"), StandardCopyOption.REPLACE_EXISTING);
+                System.out.println("Replacing original asset file with modified version");
+                Files.copy(Paths.get(args[1] + ".modified"), Paths.get(args[1]), StandardCopyOption.REPLACE_EXISTING);
+                Files.delete(Paths.get(args[1] + ".modified"));
+
             }
             System.out.println("Done.");
         }
