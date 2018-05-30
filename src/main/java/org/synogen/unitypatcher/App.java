@@ -21,7 +21,7 @@ public class App {
             System.out.println();
             System.out.println("    unitypatcher export <assets-file> <path ID or asset name or *>");
             System.out.println("    unitypatcher import <assets-file> <path ID or asset name> <file to import>");
-            System.out.println("    unitypatcher patch <assets-file> <patch file>");
+            System.out.println("    unitypatcher patch <assets-file> <patch file> <more patch files(optional)...>");
             System.out.println();
             System.out.println("Notes:");
             System.out.println("Use UABE or another tool to get information on the path ID of a certain asset, only file ID 0 is supported by unitypatcher right now.");

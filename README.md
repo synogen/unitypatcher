@@ -13,9 +13,14 @@ Command line overview:
 
 `unitypatcher import <assets-file> <path ID/asset name> <file to import>`
 
-`unitypatcher patch <assets-file> <patch file>`
+`unitypatcher patch <assets-file> <patch file> <more patch files(optional)...>`
 
-Example: `unitypatcher export sharedassets3.assets 530`
+Examples: 
+
+`unitypatcher export sharedassets3.assets 530`
+
+`unitypatcher patch sharedassets2.assets ChangeThis.assetmod ChangeThat.assetmod`
+
 
 Run `unitypatcher` without arguments to get help.
 
