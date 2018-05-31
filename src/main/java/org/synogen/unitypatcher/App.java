@@ -48,33 +48,33 @@ public class App {
                     for (UnityIndex idx : assets.keySet()) {
                         UnityAsset asset = assets.get(idx);
                         if (asset.isTextContent()) {
-                            String filename = prefix + "_" + idx.getId() + ".txt";
+                            String filename = prefix + "_" + idx.getInteger("id") + ".txt";
                             Files.write(Paths.get(filename), asset.asTextContent());
-                            System.out.println("Exported asset with path ID " + idx.getId() + " (" + asset.getTextName() + ") as text content (" + filename + ")");
+                            System.out.println("Exported asset with path ID " + idx.getInteger("id") + " (" + asset.getTextName() + ") as text content (" + filename + ")");
                         }
                     }
                 } else {
                     UnityAsset asset = assets.get(index);
                     if (asset.isTextContent()) {
-                        String filename = prefix + "_" + index.getId() + ".txt";
+                        String filename = prefix + "_" + index.getInteger("id") + ".txt";
                         Files.write(Paths.get(filename), asset.asTextContent());
-                        System.out.println("Exported asset with path ID " + index.getId() + " (" + asset.getTextName() + ") as text content (" + filename + ")");
+                        System.out.println("Exported asset with path ID " + index.getInteger("id") + " (" + asset.getTextName() + ") as text content (" + filename + ")");
                     } else {
-                        String filename = prefix + "_" + index.getId() + ".raw";
+                        String filename = prefix + "_" + index.getInteger("id") + ".raw";
                         Files.write(Paths.get(filename), asset.asByteArray());
-                        System.out.println("Exported asset with path ID " + index.getId() + " as raw content (" + filename + ")");
+                        System.out.println("Exported asset with path ID " + index.getInteger("id") + " as raw content (" + filename + ")");
                     }
                 }
             } else if (args[0].equalsIgnoreCase("import")) {
                 UnityIndex index = indexFromPathIdOrName(args[2], assets);
 
                 UnityAsset asset = assets.get(index);
-                if (Util.isTextType(index)) {
+                if (asset.isTextContent()) {
                     byte[] newContent = Files.readAllBytes(Paths.get(args[3]));
                     asset.replaceTextContent(newContent);
                     assetFile.updateOffsetsAndSize();
                     assetFile.save(Paths.get(args[1] + ".modified"));
-                    System.out.println("Imported asset with path ID " + index.getId() + " as text content");
+                    System.out.println("Imported asset with path ID " + index.getInteger("id") + " as text content");
                     System.out.println("Modified asset file saved as " + args[1] + ".modified");
                 }
             } else if (args[0].equalsIgnoreCase("patch")) {
@@ -93,7 +93,7 @@ public class App {
                         }
 
                         UnityIndex index = indexFromPathIdOrName(pathId, assets);
-                        System.out.println("Reading text content from asset " + index.getId());
+                        System.out.println("Reading text content from asset " + index.getInteger("id"));
                         UnityAsset asset = assets.get(index);
 
                         System.out.println("Patching content");
@@ -134,11 +134,9 @@ public class App {
             return null;
         } else if (!isInteger(arg)) {
             for (UnityIndex index : assets.keySet()) {
-                if (Util.isTextType(index)) {
-                    UnityAsset asset = assets.get(index);
-                    if (arg.equalsIgnoreCase(asset.getTextName())) {
-                        return index;
-                    }
+                UnityAsset asset = assets.get(index);
+                if (asset.isTextContent() && arg.equalsIgnoreCase(asset.getTextName())) {
+                    return index;
                 }
             }
             return null;

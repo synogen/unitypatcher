@@ -18,7 +18,10 @@ public class AssetFile extends Mapping {
 
     private final Integer BYTES_TO_SCAN = 10240;
     private final String HEADER_STRUCTURE = "i(filesize)i(version)i(headersize)i";
-    private final String INDEX_STRUCTURE = "(id)i(unknown)i(offset)i(size)i(type)i";
+    private final String INDEX_STRUCTURE_UNITY2017 = "(id)ii(offset)i(size)i(type)i";
+    private final Integer INDEX_LENGTH_UNITY2017 = 20;
+    private final String INDEX_STRUCTURE_UNITY5 = "(id)ii(offset)i(size)i(type)iii";
+    private final Integer INDEX_LENGTH_UNITY5 = 28;
 
     @Getter
     private Path file;
@@ -54,7 +57,7 @@ public class AssetFile extends Mapping {
         System.out.println("Trying to find entry point for file index...");
         setByteOrder(ByteOrder.LITTLE_ENDIAN);
         assetIndex = getIndexList(channel);
-        if (assetIndex != null) {
+        if (!assetIndex.isEmpty()) {
             System.out.println("Found file index, reading assets...");
             assets = getAllAssets(channel);
         } else {
@@ -71,25 +74,30 @@ public class AssetFile extends Mapping {
         HashMap<Integer, List<UnityIndex>> indexLists = new LinkedHashMap<>();
         for (int i = 0; i <= BYTES_TO_SCAN; i++) {
             channel.position(i);
-            parseStructure(channel, INDEX_STRUCTURE);
 
             Integer previousId = 0;
-            Integer currentId = getInteger("id");
-            Integer offset = getInteger("offset");
-            Integer size = getInteger("size");
-            Integer type = getInteger("type");
-            Integer unknown = getInteger("unknown");
+            ByteBuffer buffer = ByteBuffer.allocate(INDEX_LENGTH_UNITY2017);
+            buffer.order(ByteOrder.LITTLE_ENDIAN);
+            channel.read(buffer);
+            UnityIndex index = new UnityIndex(INDEX_STRUCTURE_UNITY2017, buffer.array());
+
+            Integer currentId = index.getInteger("id");
+            Integer offset = index.getInteger("offset");
+            Integer size = index.getInteger("size");
             if (currentId == 1 && offset >= 0 && offset < filesize && size >= 0 && size < filesize) {
                 List<UnityIndex> indexList = new ArrayList<>();
                 do {
-                    indexList.add(new UnityIndex(currentId, offset, size, type, unknown));
+                    indexList.add(index);
+
                     previousId = currentId;
-                    parseStructure(channel, INDEX_STRUCTURE);
-                    currentId = getInteger("id");
-                    offset = getInteger("offset");
-                    size = getInteger("size");
-                    type = getInteger("type");
-                    unknown = getInteger("unknown");
+
+                    buffer = ByteBuffer.allocate(INDEX_LENGTH_UNITY2017);
+                    channel.read(buffer);
+                    index = new UnityIndex(INDEX_STRUCTURE_UNITY2017, buffer.array());
+
+                    currentId = index.getInteger("id");
+                    offset = index.getInteger("offset");
+                    size = index.getInteger("size");
                 } while (previousId + 1 == currentId && offset >= 0 && offset < filesize && size >= 0 && size < filesize);
 
                 if (indexList.size() > 1) {
@@ -118,9 +126,9 @@ public class AssetFile extends Mapping {
     public HashMap<UnityIndex, UnityAsset> getAllAssets(SeekableByteChannel channel) throws IOException {
         HashMap<UnityIndex, UnityAsset> assets = new LinkedHashMap<>();
         for (UnityIndex index : assetIndex) {
-            if (index.getSize() > 0) {
-                ByteBuffer buffer = ByteBuffer.allocate(index.getSize());
-                channel.position(index.getOffset() + headerSize).read(buffer);
+            if (index.getInteger("size") > 0) {
+                ByteBuffer buffer = ByteBuffer.allocate(index.getInteger("size"));
+                channel.position(index.getInteger("offset") + headerSize).read(buffer);
                 assets.put(index, new UnityAsset(buffer));
             }
         }
@@ -133,11 +141,11 @@ public class AssetFile extends Mapping {
         for (UnityIndex index : assets.keySet()) {
             UnityAsset asset = assets.get(index);
             if (offset != 0) {
-                index.setOffset(index.getOffset() + offset);
+                index.setInteger("offset", index.getInteger("offset") + offset);
             }
-            if (index.getSize().compareTo(asset.getSize()) != 0) {
-                offset += asset.getSize() - index.getSize();
-                index.setSize(asset.getSize());
+            if (index.getInteger("size").compareTo(asset.getInteger("size")) != 0) {
+                offset += asset.getInteger("size") - index.getInteger("size");
+                index.setInteger("size", asset.getInteger("size"));
             }
         }
         newFilesize = Math.toIntExact(filesize + offset);
@@ -186,7 +194,7 @@ public class AssetFile extends Mapping {
         Integer previousOffset = 0;
         Integer previousSize = 0;
         for (UnityIndex index : assets.keySet()) {
-            Integer paddingLength = index.getOffset() - (previousOffset + previousSize);
+            Integer paddingLength = index.getInteger("offset") - (previousOffset + previousSize);
 
             // null-byte padding that exists in the original file for unknown reasons
             if (paddingLength > 0) {
@@ -202,8 +210,8 @@ public class AssetFile extends Mapping {
 
             writeChannel.write(asset.getOutputBuffer());
 
-            previousOffset = index.getOffset();
-            previousSize = index.getSize();
+            previousOffset = index.getInteger("offset");
+            previousSize = index.getInteger("size");
         }
 
         readChannel.close();
