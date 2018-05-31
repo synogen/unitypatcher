@@ -63,7 +63,7 @@ public class UnityAsset extends Mapping {
             if (textPercentage(name) > 75 && (content.position() + paddingFor(nameLength)) < content.capacity()) {
                 content.position(content.position() + paddingFor(nameLength));
                 Integer textLength = content.getInt();
-                if (textLength > 0 && textLength < 20000000 && textLength <= (content.capacity() - content.position())) {
+                if (textLength > 5 && textLength < 20000000 && textLength <= (content.capacity() - content.position())) {
                     byte[] text = new byte[textLength];
                     content.get(text);
                     if (textPercentage(text) > 75) {

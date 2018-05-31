@@ -16,7 +16,7 @@ import java.util.List;
 
 public class AssetFile extends Mapping {
 
-    private final Integer BYTES_TO_SCAN = 10240;
+    private final Integer BYTES_TO_SCAN = 102400;
     private final String HEADER_STRUCTURE = "i(filesize)i(version)i(headersize)i";
     private final String INDEX_STRUCTURE_UNITY2017 = "(id)ii(offset)i(size)i(type)i";
     private final Integer INDEX_LENGTH_UNITY2017 = 20;
@@ -56,7 +56,12 @@ public class AssetFile extends Mapping {
 
         System.out.println("Trying to find entry point for file index...");
         setByteOrder(ByteOrder.LITTLE_ENDIAN);
-        assetIndex = getIndexList(channel);
+        assetIndex = getIndexList(channel, INDEX_STRUCTURE_UNITY2017, INDEX_LENGTH_UNITY2017);
+        if (assetIndex.isEmpty()) {
+            System.out.println("No Unity 2017 index found, trying Unity 5...");
+            assetIndex = getIndexList(channel, INDEX_STRUCTURE_UNITY5, INDEX_LENGTH_UNITY5);
+        }
+
         if (!assetIndex.isEmpty()) {
             System.out.println("Found file index, reading assets...");
             assets = getAllAssets(channel);
@@ -67,7 +72,7 @@ public class AssetFile extends Mapping {
         channel.close();
     }
 
-    private List<UnityIndex> getIndexList(SeekableByteChannel channel) throws IOException, FormatInvalid {
+    private List<UnityIndex> getIndexList(SeekableByteChannel channel, String indexStructure, Integer indexLength) throws IOException, FormatInvalid {
         Long filesize = channel.size();
 
         // try and find the repeating pattern for the asset index
@@ -76,10 +81,10 @@ public class AssetFile extends Mapping {
             channel.position(i);
 
             Integer previousId = 0;
-            ByteBuffer buffer = ByteBuffer.allocate(INDEX_LENGTH_UNITY2017);
+            ByteBuffer buffer = ByteBuffer.allocate(indexLength);
             buffer.order(ByteOrder.LITTLE_ENDIAN);
             channel.read(buffer);
-            UnityIndex index = new UnityIndex(INDEX_STRUCTURE_UNITY2017, buffer.array());
+            UnityIndex index = new UnityIndex(indexStructure, buffer.array());
 
             Integer currentId = index.getInteger("id");
             Integer offset = index.getInteger("offset");
@@ -91,9 +96,9 @@ public class AssetFile extends Mapping {
 
                     previousId = currentId;
 
-                    buffer = ByteBuffer.allocate(INDEX_LENGTH_UNITY2017);
+                    buffer = ByteBuffer.allocate(indexLength);
                     channel.read(buffer);
-                    index = new UnityIndex(INDEX_STRUCTURE_UNITY2017, buffer.array());
+                    index = new UnityIndex(indexStructure, buffer.array());
 
                     currentId = index.getInteger("id");
                     offset = index.getInteger("offset");
