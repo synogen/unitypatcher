@@ -37,7 +37,7 @@ public class AssetFile extends Mapping {
     @Getter
     private List<UnityIndex> assetIndex;
     @Getter
-    private HashMap<UnityIndex, UnityAsset> assets;
+    private HashMap<UnityIndex, UnityAsset> assets = new LinkedHashMap<>();
 
 
 
@@ -63,7 +63,7 @@ public class AssetFile extends Mapping {
         }
 
         if (!assetIndex.isEmpty()) {
-            System.out.println("Found file index, reading assets...");
+            System.out.println("Found file index with " + assetIndex.size() + " entries, reading assets...");
             assets = getAllAssets(channel);
         } else {
             System.out.println("No file index found");
@@ -77,7 +77,7 @@ public class AssetFile extends Mapping {
 
         // try and find the repeating pattern for the asset index
         HashMap<Integer, List<UnityIndex>> indexLists = new LinkedHashMap<>();
-        for (int i = 0; i <= BYTES_TO_SCAN; i++) {
+        for (int i = 0; i <= BYTES_TO_SCAN && i < filesize - indexLength; i++) {
             channel.position(i);
 
             Integer previousId = 0;

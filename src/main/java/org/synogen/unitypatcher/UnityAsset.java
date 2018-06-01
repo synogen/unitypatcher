@@ -54,6 +54,9 @@ public class UnityAsset extends Mapping {
     }
 
     public boolean isTextContent() {
+        if (content.capacity() < 8) {
+            return false;
+        }
         content.order(ByteOrder.LITTLE_ENDIAN);
         content.position(0);
         Integer nameLength = content.getInt();

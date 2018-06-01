@@ -37,6 +37,10 @@ public class App {
             AssetFile assetFile = new AssetFile(Paths.get(args[1]));
             assetFile.parse();
             HashMap<UnityIndex, UnityAsset> assets = assetFile.getAssets();
+            if (assets.isEmpty()) {
+                System.out.println("No assets found.");
+                return;
+            }
 
             if (args[0].equalsIgnoreCase("export")) {
                 UnityIndex index = indexFromPathIdOrName(args[2], assets);
