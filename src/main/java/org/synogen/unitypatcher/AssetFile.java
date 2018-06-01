@@ -148,9 +148,9 @@ public class AssetFile extends Mapping {
             if (offset != 0) {
                 index.setInteger("offset", index.getInteger("offset") + offset);
             }
-            if (index.getInteger("size").compareTo(asset.getInteger("size")) != 0) {
-                offset += asset.getInteger("size") - index.getInteger("size");
-                index.setInteger("size", asset.getInteger("size"));
+            if (index.getInteger("size").compareTo(asset.getSize()) != 0) {
+                offset += asset.getSize() - index.getInteger("size");
+                index.setInteger("size", asset.getSize());
             }
         }
         newFilesize = Math.toIntExact(filesize + offset);

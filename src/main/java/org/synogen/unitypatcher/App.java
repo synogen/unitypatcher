@@ -79,7 +79,7 @@ public class App {
                     assetFile.updateOffsetsAndSize();
                     assetFile.save(Paths.get(args[1] + ".modified"));
                     System.out.println("Imported asset with path ID " + index.getInteger("id") + " as text content");
-                    System.out.println("Modified asset file saved as " + args[1] + ".modified");
+                    System.out.println("Modified assets file saved as " + args[1] + ".modified");
                 }
             } else if (args[0].equalsIgnoreCase("patch")) {
                 List<String> files = new ArrayList<>();
@@ -89,6 +89,7 @@ public class App {
                 for (String file : files) {
                     List<String> lines = Files.readAllLines(Paths.get(file));
                     if (lines.size() >= 3) {
+                        System.out.println("Applying patch from " + file.toString());
                         String pathId = lines.get(0);
                         String regex = lines.get(1);
                         String replace = "";
@@ -112,18 +113,18 @@ public class App {
                         System.out.println("Replacing " + replacementCount + " matches...");
                         textcontent = matcher.replaceAll(replace);
 
-                        System.out.println("Writing content back to file");
+                        System.out.println("Writing content back to asset");
                         asset.replaceTextContent(textcontent.getBytes());
                     }
                 }
 
-
+                System.out.println("Updating assets file");
                 assetFile.updateOffsetsAndSize();
                 assetFile.save(Paths.get(args[1] + ".modified"));
 
-                System.out.println("Creating backup of the original asset file (" + args[1] + ".modbackup)");
+                System.out.println("Creating backup of the original assets file (" + args[1] + ".modbackup)");
                 Files.copy(Paths.get(args[1]), Paths.get(args[1] + ".modbackup"), StandardCopyOption.REPLACE_EXISTING);
-                System.out.println("Replacing original asset file with modified version");
+                System.out.println("Replacing original assets file with modified version");
                 Files.copy(Paths.get(args[1] + ".modified"), Paths.get(args[1]), StandardCopyOption.REPLACE_EXISTING);
                 Files.delete(Paths.get(args[1] + ".modified"));
 

@@ -84,6 +84,7 @@ public class UnityIndex {
         result.order(ByteOrder.LITTLE_ENDIAN);
         result.putInt(text.length());
         result.put(text.getBytes());
+        result.flip();
         return result;
     }
 
@@ -91,6 +92,7 @@ public class UnityIndex {
         ByteBuffer result = ByteBuffer.allocate(4);
         result.order(ByteOrder.LITTLE_ENDIAN);
         result.putInt(number);
+        result.flip();
         return result;
     }
 
@@ -103,7 +105,11 @@ public class UnityIndex {
                 channel.write(convertInteger((Integer)object));
             }
         }
-        return ByteBuffer.wrap(((SeekableInMemoryByteChannel) channel).array());
+        ByteBuffer result = ByteBuffer.allocate(Math.toIntExact(channel.size()));
+        channel.position(0);
+        channel.read(result);
+        result.flip();
+        return result;
     }
 
     @Override
