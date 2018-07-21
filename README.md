@@ -27,13 +27,19 @@ Run `unitypatcher` without arguments to get help.
 ## Patch file format
 
 First line: The text asset name
+
 Second line: The regular expression to search for in the text asset (you can test your regular expressions at [Regex101](https://regex101.com/) )
+
 Third line and after: The text found using the regular expression will be replaced by this, group matchers ($1) are supported
 
+
 Example:
-`Constants
-(<td div="Member">s_maxJobs</td>\s+<td div="Value")>\d+<(/td>)
-$1>6<$2`
+
+`Constants`
+
+`(<td div="Member">s_maxJobs</td>\s+<td div="Value")>\d+<(/td>)`
+
+`$1>6<$2`
 
 
 ## Download
