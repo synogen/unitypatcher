@@ -30,7 +30,7 @@ First line: The text asset name
 
 Second line: The regular expression to search for in the text asset (you can test your regular expressions at [Regex101](https://regex101.com/) )
 
-Third line and after: The text found using the regular expression will be replaced by this, group matchers ($1) are supported. Be aware that using backslashes in the replacement string may lead to problems due to way regex replacing works in Java. Either write them as \\ to escape them as literal characters or use forward slashes instead. 
+Third line and after: The text found using the regular expression will be replaced by this, group matchers ($1) are supported. Be aware that using backslashes in the replacement string may lead to problems due to way regex replacing works in Java. Either write them as \\\\ to escape them as literal characters or use forward slashes instead. 
 
 
 Example:
