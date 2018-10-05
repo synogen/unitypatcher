@@ -14,7 +14,7 @@ public class App {
 
     public static void main(String[] args) throws IOException, FormatInvalid {
         if (args == null || args.length < 3) {
-            System.out.println("unitypatcher 0.0.4 (https://github.com/synogen/unitypatcher)");
+            System.out.println("unitypatcher 0.0.5dev (https://github.com/synogen/unitypatcher)");
             System.out.println("!! ONLY TEXT ASSETS SUPPORTED FOR IMPORT/PATCHING RIGHT NOW !!");
             System.out.println();
             System.out.println("Usage:");
@@ -55,6 +55,10 @@ public class App {
                             String filename = prefix + "_" + idx.getInteger("id") + ".txt";
                             Files.write(Paths.get(filename), asset.asTextContent());
                             System.out.println("Exported asset with path ID " + idx.getInteger("id") + " (" + asset.getTextName() + ") as text content (" + filename + ")");
+                        } else if (args.length > 3 && "raw".equalsIgnoreCase(args[3])) {
+                            String filename = prefix + "_" + idx.getInteger("id") + ".raw";
+                            Files.write(Paths.get(filename), asset.asByteArray());
+                            System.out.println("Exported asset with path ID " + idx.getInteger("id") + " as raw content (" + filename + ")");
                         }
                     }
                 } else {
@@ -98,6 +102,11 @@ public class App {
                         }
 
                         UnityIndex index = indexFromPathIdOrName(pathId, assets);
+                        if (index == null) {
+                            System.out.println("ERROR: Text asset \"" + pathId + "\" could not be found in " + assetFile.getFile().toString());
+                            System.out.println("Make sure you provided the right asset name and the correct asset file!");
+                            return;
+                        }
                         System.out.println("Reading text content from asset " + index.getInteger("id"));
                         UnityAsset asset = assets.get(index);
 
